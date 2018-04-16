@@ -1,3 +1,22 @@
+## Better fix it frontend
+
+
+## What you need to run project on your local machine
+
+* Check if you have installed nodejs and npm
+run in terminal following commands
+`node -v`
+`npm -v`
+
+* If not installed, install node js https://nodejs.org/en/download/
+
+## How to start the project 
+
+`git clone git@github.com:dinkra/better-fix-it-app.git`
+`npm start`
+
+## More info over the project
+
 This project was bootstrapped with [Create React App](https://github.com/facebookincubator/create-react-app).
 
 Below you will find some information on how to perform common tasks.<br>
