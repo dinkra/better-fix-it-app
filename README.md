@@ -1,5 +1,7 @@
-## Better fix it frontend
+# Better fix it frontend
 
+QR stickers on trashcans. To be scanned when full. Leads to website. Scanner confirms location. 
+This data is saved in the backend. Admin tool will analyze input data and show which locations have been scanned most in the last chosen period of time.
 
 ## What you need to run project on your local machine
 
