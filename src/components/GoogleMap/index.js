@@ -269,8 +269,8 @@ Gmap.propTypes = {
 const defaultCoordinates = {
   // Center of Amsterdam
   initialCenter: {
-    lat: 52.3702,
-    lng: 4.8952
+    lat: 52.373637,
+    lng: 4.880264
   },
 
   // Center of the map when zoomed out completely
@@ -286,7 +286,7 @@ const zoom = {
 };
 
 Gmap.defaultProps = {
-  zoomLevel: 13,
+  zoomLevel: 18,
   maxZoom: zoom.max,
   minZoom: zoom.min,
   defaultCoordinates,
@@ -303,6 +303,6 @@ Gmap.defaultProps = {
 
 // eslint-disable-next-line
 export default GoogleApiWrapper({
-  apiKey: fashionTradeSettings.google_maps_api_key,
-  version: fashionTradeSettings.google_maps_version
+  apiKey: 'AIzaSyB4xfIaSitASdx-VvSqf3mxQuPtQX_52XE',
+  version: 3.28
 })(Gmap);
