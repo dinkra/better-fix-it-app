@@ -8,7 +8,7 @@ This data is saved in the backend. Admin tool will analyze input data and show w
 - [x] Setup project with react
 - [x] Ask for momentary location data access with a confirm button. Pressing confirm saves geo location at that moment.
 - [x] Below this question for location confirmation should be a map, where the current location can be seen.
-- [ ] After confirming the location, a popup should say: Thank you for letting us know that this trash can in your area is full. We will let the respective authorities know about the issue asap.
+- [x] After confirming the location, a popup should say: Thank you for letting us know that this trash can in your area is full. We will let the respective authorities know about the issue asap.
 - [x] The header of the page should contain the name of the project as well as the ascription Alpha version.
 - [x] The footer should contain contact information tbd (e-mail).
 - [ ] Scanning a QR code should lead to a website of our choosing (website should be mobile first)
