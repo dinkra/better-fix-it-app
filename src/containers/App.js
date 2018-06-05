@@ -1,6 +1,6 @@
 import React, { Component } from 'react';
 import styled from 'styled-components';
-import { Button } from 'react-bootstrap';
+import { Button, Modal } from 'react-bootstrap';
 
 import api from '../api';
 import Header from '../components/Header';
@@ -24,11 +24,18 @@ const StyledButton = styled(Button)`
   }
 `;
 
+const SuccessText = styled('div')`
+  text-align: center;
+  text-font: 18px;
+  padding: 50px 0;
+`;
+
 class App extends Component {
   state = {
     loading: true,
     lat: null,
-    lng: null
+    lng: null,
+    success: false
   };
 
   onLocationLoaded = (lat, lng) => {
@@ -48,14 +55,26 @@ class App extends Component {
 
   submitLocation = () => {
     const { lat, lng } = this.state;
-    api.postLocation(lat, lng);
+    api.postLocation(lat, lng)
+      .then(() => {
+        this.setState({
+          success: true
+        });
+      })
   };
 
   render() {
-    const { loading } = this.state;
+    const { loading, success } = this.state;
     return (
       <div className="App">
         {loading && (<Loader />)}
+        {success && (
+          <Modal show={success} onHide={this.handleClose}>
+            <Modal.Title>
+              <SuccessText>Thank you!</SuccessText>
+            </Modal.Title>
+          </Modal>
+        )}
         <Header />
         <Gmap
           style={{ height: 'calc(100vh - 100px)' }}
