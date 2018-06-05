@@ -3,8 +3,8 @@
  */
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
-import { Map, InfoWindow, Marker, GoogleApiWrapper } from 'google-maps-react';
-import { get, debounce } from 'lodash';
+import { Map, Marker, GoogleApiWrapper } from 'google-maps-react';
+import { debounce } from 'lodash';
 import styled from 'styled-components';
 
 const Wrapper = styled('div')`
@@ -23,51 +23,6 @@ const Wrapper = styled('div')`
   }
 `;
 
-const InfoWindowWrapper = styled('div')`
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  width: 235px;
-  height: 175px;
-  overflow: hidden;
-`;
-
-const InfoWindowImage = styled('div')`
-  position: absolute;
-  z-index: 100;
-  top: 0;
-  left: 0;
-  right: 0;
-  background-image: url('${props => props.image}');
-  background-position: center;
-  background-repeat: no-repeat;
-  background-size: 110% auto;
-  width: 100%;
-  height: 115px;
-`;
-
-const InfoWindowAbout = styled('div')`
-  position: relative;
-  top: 125px;
-  width: 265px;
-  margin: 10px 0 0 20px;
-  color: #78828B;
-  a {
-    text-decoration: none;
-    color: #78828B;
-  }
-  h5 {
-    font-weight: 500;
-    font-size: 16px;
-    margin-bottom: 0px;
-  }
-  p {
-    font-size: 16px;
-  }
-`;
-
-
 class Gmap extends Component {
   constructor() {
     super();
@@ -78,30 +33,20 @@ class Gmap extends Component {
       selectedPlace: null
     };
   }
+
   componentWillMount() {
     this.delayedUpdateBoundaries = debounce(this.props.updateBoundaries, 400);
   }
-  onMapClick = () => {
-    if (this.state.showingInfoWindow) {
-      this.setState({
-        showingInfoWindow: false,
-        activeMarker: null
-      });
-    }
-  };
 
-  onMarkerClick = (props, marker) => {
+  onMapClick = (props, map) => {
+    const lat = map.center.lat();
+    const lng = map.center.lng();
+    this.props.setLocation(lat, lng);
     this.setState({
-      showingInfoWindow: true,
-      activeMarker: marker,
-      selectedPlace: props
-    });
-  };
-
-  onInfoWindowClose = () => {
-    this.setState({
-      showingInfoWindow: false,
-      activeMarker: null
+      activeMarker: {
+        lat,
+        lng
+      }
     });
   };
 
@@ -124,8 +69,16 @@ class Gmap extends Component {
   };
 
   onRecenter = (props, map) => {
-    const bounds = this.getBounds(map);
-    this.handleUpdateBoundaries(bounds);
+    const lat = map.center.lat();
+    const lng = map.center.lng();
+    this.props.locationLoaded();
+    this.props.setLocation(lat, lng);
+    this.setState({
+      activeMarker: {
+        lat,
+        lng
+      }
+    });
   };
 
   setMinZoomCenter = (map) => {
@@ -146,44 +99,22 @@ class Gmap extends Component {
     this.delayedUpdateBoundaries(bounds.northEast, bounds.southWest);
   };
 
-  fitbounds = (props, map) => {
-    if (!this.props.shouldUseFitBounds) {
-      return;
-    }
-    const { google, markers } = this.props;
-    const bounds = new google.maps.LatLngBounds();
-    const positions = markers.map(marker => new google.maps.Marker({
-      icon: marker.icon,
-      position: marker.position
-    }));
-    for (let i = 0; i < positions.length; i++) {
-      bounds.extend(positions[i].getPosition());
-    }
-    map.fitBounds(bounds);
-  };
-
   render() {
     const {
       centerAroundCurrentLocation,
       clickableIcons,
       defaultCoordinates: { initialCenter },
       google,
-      markers,
       maxZoom,
       minZoom,
       style,
       zoomLevel
     } = this.props;
-    const {
-      activeMarker,
-      selectedPlace,
-      showingInfoWindow,
-    } = this.state;
+    const { activeMarker } = this.state;
     return (
       <Wrapper style={{ height: style.height }}>
         {/* passing height here will prevent the scroll from breaking when blocks are below this */}
         <Map
-          onReady={this.fitbounds}
           google={google}
           zoom={zoomLevel}
           style={style}
@@ -197,39 +128,10 @@ class Gmap extends Component {
           minZoom={minZoom}
           centerAroundCurrentLocation={centerAroundCurrentLocation}
         >
-          {markers.map((marker) => (
-            <Marker
-              key={marker.key}
-              onClick={this.onMarkerClick}
-              name={marker.name}
-              address={marker.address}
-              image={marker.image}
-              link={marker.link}
-              position={marker.position}
-              optimized={false}
-              icon={{
-                url: marker.icon
-              }}
-            />
-          ))}
-          <InfoWindow
-            onClose={this.onInfoWindowClose}
-            onOpen={this.onReady}
-            marker={activeMarker}
-            visible={showingInfoWindow}
-          >
-            <InfoWindowWrapper>
-              <InfoWindowImage
-                image={`${get(selectedPlace, 'image')}`}
-              />
-              <InfoWindowAbout>
-                <a href={`/retailer/${get(selectedPlace, 'link')}`}>
-                  <h5>{get(selectedPlace, 'name')}</h5>
-                  <p>{get(selectedPlace, 'address')}</p>
-                </a>
-              </InfoWindowAbout>
-            </InfoWindowWrapper>
-          </InfoWindow>
+          <Marker
+            position={activeMarker}
+            optimized={false}
+          />
         </Map>
       </Wrapper>
     );
@@ -251,7 +153,6 @@ const MarkerShape = PropTypes.shape({
 });
 
 Gmap.propTypes = {
-  shouldUseFitBounds: PropTypes.bool,
   defaultCoordinates: PropTypes.object.isRequired,
   // google component props
   google: PropTypes.object,
@@ -260,9 +161,8 @@ Gmap.propTypes = {
   minZoom: PropTypes.number,
   centerAroundCurrentLocation: PropTypes.bool.isRequired,
   // parent props
-  markers: PropTypes.arrayOf(MarkerShape),
-  clickableIcons: PropTypes.bool,
-  updateBoundaries: PropTypes.func,
+  locationLoaded: PropTypes.func,
+  setLocation: PropTypes.func,
   style: PropTypes.object
 };
 
@@ -281,7 +181,7 @@ const defaultCoordinates = {
 };
 
 const zoom = {
-  max: 15,
+  max: 18,
   min: 2
 };
 
